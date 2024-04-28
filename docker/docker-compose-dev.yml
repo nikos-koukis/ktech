@@ -1,0 +1,108 @@
+version: '1'
+
+networks:
+  ktech:
+
+
+volumes:
+  mysql:
+
+
+services:
+  nginx:
+    build:
+      context: ./config/nginx
+      dockerfile: Dockerfile-dev
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    container_name: nginx
+    ports:
+      - 8080:80
+      - 8090:3000
+    volumes:
+      - ../api:/var/www/html/api
+    depends_on:
+      - php
+      - redis
+      - mysql
+    networks:
+      - ktech
+  mysql:
+    image: mysql:8.0
+    cap_add:
+      - SYS_NICE
+    restart: always
+    container_name: mysql
+    environment:
+      - MYSQL_DATABASE=ktech
+      - MYSQL_ROOT_PASSWORD=j2~q@Eb[uVs9##MZ\9'Q9
+    ports:
+      - 127.0.0.1:3306:3306
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ktech
+  php:
+    build:
+      context: ./config/php
+      dockerfile: Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    container_name: php
+    volumes:
+      - ../api:/var/www/html/api:delegated
+    networks:
+      - ktech
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:6379:6379
+    networks:
+      - ktech
+  composer:
+    build:
+      context: ./config/composer
+      dockerfile: Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    container_name: composer
+    volumes:
+      - ../api:/var/www/html/api:delegated
+    working_dir: /var/www/html/api
+    depends_on:
+      - php
+    user: laravel
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    networks:
+      - ktech
+  artisan:
+    build:
+      context: ./config/php
+      dockerfile: Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    container_name: artisan
+    volumes:
+      - ../api:/var/www/html/api:delegated
+    depends_on:
+      - mysql
+    working_dir: /var/www/html/api
+    entrypoint: [ 'php', '/var/www/html/api/artisan' ]
+    networks:
+      - ktech
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    ports:
+      - 127.0.0.1:7700:7700
+    volumes:
+      - ./meilisearch/data.ms:/data.ms
+    networks:
+      - ktech
