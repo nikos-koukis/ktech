@@ -35,8 +35,8 @@ services:
     restart: always
     container_name: mysql
     environment:
-      - MYSQL_DATABASE=ktech
-      - MYSQL_ROOT_PASSWORD=j2~q@Eb[uVs9##MZ\9'Q9
+      - MYSQL_DATABASE=ktechdb
+      - MYSQL_ROOT_PASSWORD=2RgwP@JpZe&ZFGPj
     ports:
       - 127.0.0.1:3306:3306
     volumes:
@@ -81,6 +81,15 @@ services:
     entrypoint: [ 'composer', '--ignore-platform-reqs' ]
     networks:
       - ktech
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    ports:
+      - 127.0.0.1:7700:7700
+    volumes:
+      - ./meilisearch/data.ms:/data.ms
+    networks:
+      - ktech
   artisan:
     build:
       context: ./config/php
@@ -95,14 +104,5 @@ services:
       - mysql
     working_dir: /var/www/html/api
     entrypoint: [ 'php', '/var/www/html/api/artisan' ]
-    networks:
-      - ktech
-  meilisearch:
-    image: getmeili/meilisearch:latest
-    container_name: meilisearch
-    ports:
-      - 127.0.0.1:7700:7700
-    volumes:
-      - ./meilisearch/data.ms:/data.ms
     networks:
       - ktech
