@@ -12,7 +12,7 @@ services:
   nginx:
     build:
       context: ./config/nginx
-      dockerfile: Dockerfile-dev
+      dockerfile: Dockerfile
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
@@ -26,22 +26,6 @@ services:
       - php
       - redis
       - mysql
-    networks:
-      - ktech
-  mysql:
-    image: mysql:8.0
-    cap_add:
-      - SYS_NICE
-    restart: always
-    container_name: mysql
-    environment:
-      - MYSQL_DATABASE=ktechdb
-      - MYSQL_ROOT_PASSWORD=2RgwP@JpZe&ZFGPj
-    ports:
-      - 127.0.0.1:3306:3306
-    volumes:
-      - mysql:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - ktech
   php:
