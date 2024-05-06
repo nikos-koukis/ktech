@@ -3,11 +3,6 @@ version: '1'
 networks:
   ktech:
 
-
-volumes:
-  mysql:
-
-
 services:
   nginx:
     build:
@@ -25,7 +20,6 @@ services:
     depends_on:
       - php
       - redis
-      - mysql
     networks:
       - ktech
   php:
