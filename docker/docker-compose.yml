@@ -65,19 +65,3 @@ services:
     entrypoint: [ 'composer', '--ignore-platform-reqs' ]
     networks:
       - ktech
-  artisan:
-    build:
-      context: ./config/php
-      dockerfile: Dockerfile
-      args:
-        - UID=${UID:-1000}
-        - GID=${GID:-1000}
-    container_name: artisan
-    volumes:
-      - ../api:/var/www/html/api:delegated
-    depends_on:
-      - mysql
-    working_dir: /var/www/html/api
-    entrypoint: [ 'php', '/var/www/html/api/artisan' ]
-    networks:
-      - ktech
